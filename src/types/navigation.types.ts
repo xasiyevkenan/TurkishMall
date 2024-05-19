@@ -5,10 +5,12 @@ export type AppNavigation = NativeStackNavigationProp<NavigationParamList>;
 
 export type NavigationParamList = {
   [Routes.home]: {
-    storeUrl: string | undefined
+    storeUrl?: string | undefined,
+    userId?:string,
   };
   [Routes.store]: {
-    storeUrl: string
+    storeUrl?: string,
+    userId?:string,
   };
   [Routes.basket]: undefined;
 };
