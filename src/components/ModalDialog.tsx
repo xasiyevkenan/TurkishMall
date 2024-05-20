@@ -47,12 +47,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-  },
+  } as ViewStyle,
   modal: {
     width: CommonDimensions.windowWidth - 40,
     backgroundColor: 'white',
     padding: 30,
     borderRadius: 16,
     maxHeight: '90%',
-  },
+  } as ViewStyle,
 });

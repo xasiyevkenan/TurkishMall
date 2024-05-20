@@ -4,7 +4,7 @@ import {Routes} from './Routes';
 import {HomeScreen} from 'screens/Home.Screen';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {mainStackScreenOption} from 'configs/navigation.config';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, ViewStyle} from 'react-native';
 import {StoreScreen} from 'screens/Store.Screen';
 import {NavigationParamList} from 'types/navigation.types';
 import {BasketScreen} from 'screens/Basket.Screen';
@@ -30,5 +30,5 @@ export const MainRouter = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-  },
+  } as ViewStyle,
 });

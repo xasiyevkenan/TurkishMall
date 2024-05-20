@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
+    color: 'black',
     fontSize: 13,
     fontWeight: '700',
     width: '100%',
