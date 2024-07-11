@@ -1,6 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {StyleSheet, View, ActivityIndicator, ViewStyle} from 'react-native';
-import WebView from 'react-native-webview';
+import WebView, {
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from 'react-native-webview';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Routes} from 'router/Routes';
 import {NavigationParamList} from 'types/navigation.types';
@@ -20,43 +23,45 @@ export const HomeScreen: React.FC<
     }
   }, [currentUrl]);
 
-  useEffect(() => {
-    const getUserIDFromMetaTag = `
-      if (!window.metaTag) {
-        const metaTag = document.querySelector('meta[property="user_id"]');
-        if (metaTag) {
-          window.metaTag = metaTag;
-          window.ReactNativeWebView.postMessage(metaTag.content);
-        } else {
-          window.ReactNativeWebView.postMessage(null);
-        }
+  const getUserIDFromMetaTag = `
+    if (!window.metaTag) {
+      const metaTag = document.querySelector('meta[property="user_id"]');
+      if (metaTag) {
+        window.metaTag = metaTag;
+        window.ReactNativeWebView.postMessage(metaTag.content);
+      } else {
+        window.ReactNativeWebView.postMessage(null);
       }
-    `;
-
-    const runJavaScript = () => {
-      webViewRef.current?.injectJavaScript(getUserIDFromMetaTag);
-    };
-
-    if (!loading) {
-      runJavaScript();
     }
-  }, [loading]);
+  `;
 
-  const handleOpenWindow = (syntheticEvent: any) => {
-    const {nativeEvent} = syntheticEvent;
-    const {targetUrl} = nativeEvent;
-    setCurrentUrl(targetUrl);
+  const runJavaScript = (script: string) => {
+    webViewRef.current?.injectJavaScript(script);
   };
 
-  const handleNavigationStateChange = (navState: any) => {
+  const handleOpenWindow = (syntheticEvent: any) => {
+    const {targetUrl} = syntheticEvent.nativeEvent;
+    setCurrentUrl(targetUrl);
+    return true;
+  };
+
+  const handleNavigationStateChange = (navState: WebViewNavigation) => {
     const {url} = navState;
     setCurrentUrl(url);
+
+    runJavaScript(getUserIDFromMetaTag);
 
     if (!url.includes('turkishmall.com')) {
       navigation.navigate(Routes.store, {storeUrl: url, userId: userId});
       return false;
     }
+
     return true;
+  };
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    const userIdFromWebView = event.nativeEvent.data;
+    setUserId(userIdFromWebView);
   };
 
   return (
@@ -78,10 +83,7 @@ export const HomeScreen: React.FC<
         onLoadEnd={() => setLoading(false)}
         onNavigationStateChange={handleNavigationStateChange}
         startInLoadingState={true}
-        onMessage={event => {
-          const userIdFromWebView = event.nativeEvent.data;
-          setUserId(userIdFromWebView);
-        }}
+        onMessage={handleMessage}
         onOpenWindow={handleOpenWindow}
         renderLoading={() => (
           <View style={styles.loadingContainer}>

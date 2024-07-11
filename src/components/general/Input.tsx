@@ -3,13 +3,15 @@ import {View, Text, TextInput, StyleSheet, ViewStyle} from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 
 type TInput = 'text' | 'select';
-interface IInput {
+
+export interface IInput {
   type?: TInput;
   placeholder?: string;
   label?: string;
   value?: string;
   setValue?: (value: string) => void;
   errorMessage?: string;
+  style?: ViewStyle;
 }
 
 export const Input: React.FC<IInput> = ({
@@ -18,6 +20,7 @@ export const Input: React.FC<IInput> = ({
   label,
   value,
   errorMessage,
+  style,
   setValue,
 }) => {
   const renderContent = () => {
@@ -35,7 +38,7 @@ export const Input: React.FC<IInput> = ({
                 placeholder={placeholder}
                 value={value}
                 onChangeText={setValue}
-                style={[styles.input]}
+                style={[styles.input, style]}
               />
             </View>
             {errorMessage ? (

@@ -1,0 +1,1 @@
+export const POST_DATA = '/post-data';

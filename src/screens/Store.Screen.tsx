@@ -9,103 +9,109 @@ import {
   Alert,
 } from 'react-native';
 import WebView from 'react-native-webview';
+import {useForm} from 'react-hook-form';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {NavigationParamList} from 'types/navigation.types';
 import {Routes} from 'router/Routes';
 import BasketIcon from 'assets/vectors/basket.svg';
 import HomeIcon from 'assets/vectors/home.svg';
 import PlusIcon from 'assets/vectors/plus.svg';
-import {ModalDialog} from 'components/ModalDialog';
-import {Input} from 'components/Input';
-import {Button} from 'components/Button';
+import {Input} from 'components/general/Input'; // Assuming Input component path
+import {Button} from 'components/general/Button'; // Assuming Button component path
+import {postFormData} from 'services/services';
+import {ModalDialog} from 'components/modals/ModalDialog';
+import {ResponseModal} from 'components/modals/ResponseModal';
+import ControlledInput from 'components/general/InputControlled'; // Path to ControlledInput component
 import {validateInput} from 'utils/formValidation';
+
+type FormData = {
+  url: string;
+  price: string;
+  count: string;
+  size: string;
+  color: string;
+  description: string;
+};
 
 export const StoreScreen: React.FC<
   NativeStackScreenProps<NavigationParamList, Routes.store>
 > = ({route, navigation}) => {
-  const {storeUrl} = route.params;
+  const {storeUrl, userId: initialUserId} = route?.params;
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: {errors},
+  } = useForm<FormData>();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<'success' | 'error'>('success');
+  const [modalText, setModalText] = useState('');
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
-    url: '',
-    price: '',
-    count: '',
-    size: '',
-    color: '',
-    description: '',
-  });
-  const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
-    {},
-  );
-  const [allInputsFilled, setAllInputsFilled] = useState(false);
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [userId, setUserId] = useState(initialUserId);
+  const [productUrl, setProductUrl] = useState<string>('');
 
-  const checkAllInputsFilled = () => {
-    for (const key of Object.keys(formData)) {
-      if (!formData[key as keyof typeof formData]) {
-        return false;
+  console.log(productUrl);
+
+  const handleFormSubmit = async (data: FormData) => {
+    setSubmitted(true);
+    setLoading(true);
+
+    for (const field in data) {
+      if (Object.prototype.hasOwnProperty.call(data, field)) {
+        const value = (data as any)[field];
+        const errorMessage = validateInput(field, value);
+        if (errorMessage) {
+          setLoading(false);
+          return showModal('error', errorMessage);
+        }
       }
     }
-    return true;
-  };
 
-  useEffect(() => {
-    setAllInputsFilled(checkAllInputsFilled());
-  }, [formData]);
+    try {
+      await postFormData(userId, data);
+      setLoading(false);
+      onClose();
+      showModal('success', 'Form submitted successfully');
+    } catch (error) {
+      setLoading(false);
+      onClose();
+      showModal('error', 'Failed to submit form');
+    }
+  };
 
   const onClose = () => {
     setVisible(false);
-    setErrorMessages({});
-    setFormData({
-      url: '',
-      price: '',
-      count: '',
-      size: '',
-      color: '',
-      description: '',
-    });
+    setSubmitted(false);
+    setValue('url', '');
+    setValue('price', '');
+    setValue('count', '');
+    setValue('size', '');
+    setValue('color', '');
+    setValue('description', '');
   };
 
-  const handleFormSubmit = () => {
-    const errors: Record<string, string> = {};
-    let hasError = false;
+  const onCloseResponseModal = () => {
+    setModalVisible(false);
+  };
 
-    for (const key of Object.keys(formData)) {
-      const errorMessage = validateInput(
-        key,
-        formData[key as keyof typeof formData],
-      );
-      if (errorMessage) {
-        errors[key] = errorMessage;
-        hasError = true;
-      }
+  console.log(modalVisible);
+  console.log(modalText);
+  console.log(modalType);
+
+  useEffect(() => {
+    if (visible) {
+      setValue('url', productUrl);
     }
+  }, [visible]);
 
-    if (hasError) {
-      setErrorMessages(errors);
-      return;
-    }
-
-    fetch('https://turkishmall.com/api/web/post-data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId: route.params?.userId,
-        ...formData,
-      }),
-    })
-      .then(response => {
-        if (response.ok) {
-          Alert.alert('Success', 'Your order has been received');
-          onClose();
-        } else {
-          Alert.alert('Fail', 'Error server');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+  const showModal = (type: 'success' | 'error', text: string) => {
+    setModalType(type);
+    setModalText(text);
+    setModalVisible(true);
   };
 
   return (
@@ -125,6 +131,28 @@ export const StoreScreen: React.FC<
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
         )}
+        onNavigationStateChange={navState => {
+          const {url} = navState;
+
+          if (url) {
+            // Remove any file extension at the end of the URL
+            const cleanUrl = url.replace(/\.[^.\/]+$/, ''); // Remove last segment after a dot (.)
+
+            // Check if the cleaned URL ends with a digit
+            if (/\d$/.test(cleanUrl)) {
+              setProductUrl(url);
+            } else {
+              setProductUrl('');
+            }
+          }
+        }}
+      />
+
+      <ResponseModal
+        visible={modalVisible}
+        type={modalType}
+        modalText={modalText}
+        onClose={onCloseResponseModal}
       />
 
       <View style={styles.icons}>
@@ -151,74 +179,65 @@ export const StoreScreen: React.FC<
       <ModalDialog onClose={onClose} visible={visible}>
         <Text style={styles.formHeader}>Услуга 'Заказать для меня'</Text>
         <View style={styles.form}>
-          <Input
+          <ControlledInput
+            name="url"
             label="Добавить линки"
             placeholder="https://www.trendyol.com/crocs/lila-unises"
-            value={formData.url}
-            errorMessage={errorMessages.url}
-            setValue={value => {
-              setFormData({...formData, url: value});
-              setErrorMessages(prevErrors => ({...prevErrors, url: ''}));
-            }}
+            control={control}
+            defaultValue={productUrl}
+            submitted={submitted}
           />
-          <Input
+
+          <ControlledInput
+            name="price"
             label="Цена (TL)"
             placeholder="3913.77"
-            value={formData.price}
-            errorMessage={errorMessages.price}
-            setValue={value => {
-              setFormData({...formData, price: value});
-              setErrorMessages(prevErrors => ({...prevErrors, price: ''}));
-            }}
+            control={control}
+            defaultValue=""
+            submitted={submitted}
           />
-          <Input
+
+          <ControlledInput
+            name="count"
             label="Количество"
             placeholder="1"
-            value={formData.count}
-            errorMessage={errorMessages.count}
-            setValue={value => {
-              setFormData({...formData, count: value});
-              setErrorMessages(prevErrors => ({...prevErrors, count: ''}));
-            }}
+            control={control}
+            defaultValue=""
+            submitted={submitted}
           />
-          <Input
+
+          <ControlledInput
+            name="size"
             type="select"
             label="Размер"
             placeholder="Размер"
-            value={formData.size}
-            errorMessage={errorMessages.size}
-            setValue={value => {
-              setFormData({...formData, size: value});
-              setErrorMessages(prevErrors => ({...prevErrors, size: ''}));
-            }}
+            control={control}
+            defaultValue=""
+            submitted={submitted}
           />
-          <Input
+
+          <ControlledInput
+            name="color"
             label="Цвет"
             placeholder="например: Черный"
-            value={formData.color}
-            errorMessage={errorMessages.color}
-            setValue={value => {
-              setFormData({...formData, color: value});
-              setErrorMessages(prevErrors => ({...prevErrors, color: ''}));
-            }}
+            control={control}
+            defaultValue=""
+            submitted={submitted}
           />
-          <Input
+
+          <ControlledInput
+            name="description"
             label="Особые примечания"
             placeholder="примечания"
-            value={formData.description}
-            errorMessage={errorMessages.description}
-            setValue={value => {
-              setFormData({...formData, description: value});
-              setErrorMessages(prevErrors => ({
-                ...prevErrors,
-                description: '',
-              }));
-            }}
+            control={control}
+            defaultValue=""
+            submitted={submitted}
           />
+
           <Button
-            type={allInputsFilled ? 'active' : 'disabled'}
+            type={loading ? 'loading' : 'active'}
             title="Перейти к оплате"
-            onPress={handleFormSubmit}
+            onPress={handleSubmit(handleFormSubmit)}
           />
         </View>
       </ModalDialog>
@@ -275,3 +294,5 @@ const styles = StyleSheet.create({
     gap: 10,
   } as ViewStyle,
 });
+
+export default StoreScreen;
