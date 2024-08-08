@@ -89,6 +89,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('TURKISHMALL_UPLOAD_STORE_FILE')) {
+                storeFile file(TURKISHMALL_UPLOAD_STORE_FILE)
+                storePassword TURKISHMALL_UPLOAD_STORE_PASSWORD
+                keyAlias TURKISHMALL_UPLOAD_KEY_ALIAS
+                keyPassword TURKISHMALL_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {

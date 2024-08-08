@@ -1,5 +1,5 @@
-import React from 'react';
-import {StatusBar, StyleSheet, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {AppRegistry, StatusBar, StyleSheet, View} from 'react-native';
 import Router from 'router/Router';
 
 function App(): React.JSX.Element {

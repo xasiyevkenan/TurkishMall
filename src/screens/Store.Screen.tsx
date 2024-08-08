@@ -6,23 +6,21 @@ import {
   Pressable,
   ViewStyle,
   Text,
-  Alert,
 } from 'react-native';
 import WebView from 'react-native-webview';
 import {useForm} from 'react-hook-form';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {NavigationParamList} from 'types/navigation.types';
 import {Routes} from 'router/Routes';
-import BasketIcon from 'assets/vectors/basket.svg';
-import HomeIcon from 'assets/vectors/home.svg';
 import PlusIcon from 'assets/vectors/plus.svg';
-import {Input} from 'components/general/Input'; // Assuming Input component path
-import {Button} from 'components/general/Button'; // Assuming Button component path
+import {Button} from 'components/general/Button';
 import {postFormData} from 'services/services';
 import {ModalDialog} from 'components/modals/ModalDialog';
 import {ResponseModal} from 'components/modals/ResponseModal';
-import ControlledInput from 'components/general/InputControlled'; // Path to ControlledInput component
+import ControlledInput from 'components/general/InputControlled';
 import {validateInput} from 'utils/formValidation';
+import {normalize} from 'theme/metrics';
+import {translations} from 'translation';
 
 type FormData = {
   url: string;
@@ -35,8 +33,13 @@ type FormData = {
 
 export const StoreScreen: React.FC<
   NativeStackScreenProps<NavigationParamList, Routes.store>
-> = ({route, navigation}) => {
-  const {storeUrl, userId: initialUserId} = route?.params;
+> = ({route}) => {
+  type LanguageKey = 'az' | 'en' | 'ru';
+
+  const {storeUrl, userId: initialUserId, language} = route?.params;
+
+  const languageForIndex: LanguageKey = (language as LanguageKey) || 'az';
+  const t = translations[languageForIndex];
 
   const {
     control,
@@ -45,16 +48,17 @@ export const StoreScreen: React.FC<
     formState: {errors},
   } = useForm<FormData>();
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalType, setModalType] = useState<'success' | 'error'>('success');
-  const [modalText, setModalText] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalType, setModalType] = useState(t.success || t.error || t.warning);
+  const [modalText, setModalText] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [userId, setUserId] = useState(initialUserId);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
   const [productUrl, setProductUrl] = useState<string>('');
 
-  console.log(productUrl);
+  console.log(userId);
 
   const handleFormSubmit = async (data: FormData) => {
     setSubmitted(true);
@@ -66,7 +70,7 @@ export const StoreScreen: React.FC<
         const errorMessage = validateInput(field, value);
         if (errorMessage) {
           setLoading(false);
-          return showModal('error', errorMessage);
+          return showModal(t.error, errorMessage);
         }
       }
     }
@@ -75,11 +79,11 @@ export const StoreScreen: React.FC<
       await postFormData(userId, data);
       setLoading(false);
       onClose();
-      showModal('success', 'Form submitted successfully');
+      showModal(t.success, t.successMessage);
     } catch (error) {
       setLoading(false);
       onClose();
-      showModal('error', 'Failed to submit form');
+      showModal(t.error, t.errorMessage);
     }
   };
 
@@ -98,52 +102,71 @@ export const StoreScreen: React.FC<
     setModalVisible(false);
   };
 
-  console.log(modalVisible);
-  console.log(modalText);
-  console.log(modalType);
-
   useEffect(() => {
     if (visible) {
       setValue('url', productUrl);
     }
   }, [visible]);
 
-  const showModal = (type: 'success' | 'error', text: string) => {
+  const showModal = (type: string, text: string) => {
     setModalType(type);
     setModalText(text);
     setModalVisible(true);
+  };
+
+  const handleAddOrder = () => {
+    if (
+      userId == null ||
+      userId === '0' ||
+      userId === undefined ||
+      userId === ' '
+    ) {
+      showModal('warning', 'Please login after add order');
+      return;
+    }
+    setVisible(true);
   };
 
   return (
     <View style={styles.container}>
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#00997D" />
         </View>
       )}
       <WebView
         style={styles.webview}
-        source={{uri: storeUrl ? storeUrl : 'https://turkishmall.com/stores'}}
+        source={{uri: storeUrl ? storeUrl : 'https://cfex.az/az/stores'}}
         onLoadEnd={() => setLoading(false)}
         startInLoadingState={true}
         renderLoading={() => (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" color="#00997D" />
           </View>
         )}
         onNavigationStateChange={navState => {
           const {url} = navState;
 
           if (url) {
-            // Remove any file extension at the end of the URL
-            const cleanUrl = url.replace(/\.[^.\/]+$/, ''); // Remove last segment after a dot (.)
+            setCurrentUrl(url);
+            // Remove URL parameters (e.g., anything after '?' or '&')
+            const urlWithoutParams = url.split('?')[0]?.split('&')[0];
 
-            // Check if the cleaned URL ends with a digit
-            if (/\d$/.test(cleanUrl)) {
-              setProductUrl(url);
+            if (urlWithoutParams) {
+              // Remove any file extension at the end of the URL
+              const cleanUrl = urlWithoutParams.replace(/\.[^.\/]+$/, '');
+
+              // Check if the cleaned URL ends with a digit
+              if (/\d$/.test(cleanUrl)) {
+                setProductUrl(url);
+              } else {
+                setProductUrl('');
+              }
             } else {
               setProductUrl('');
             }
+          } else {
+            setProductUrl('');
           }
         }}
       />
@@ -155,33 +178,21 @@ export const StoreScreen: React.FC<
         onClose={onCloseResponseModal}
       />
 
-      <View style={styles.icons}>
-        <Pressable
-          onPress={() =>
-            navigation.navigate(Routes.home, {
-              storeUrl: 'https://turkishmall.com/',
-            })
-          }
-          style={styles.iconView}>
-          <HomeIcon style={styles.icon} />
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate(Routes.basket)}
-          style={styles.iconView}>
-          <BasketIcon style={styles.icon} />
-        </Pressable>
-        <Pressable
-          onPress={() => setVisible(true)}
-          style={[styles.iconView, styles.formIconView]}>
-          <PlusIcon style={[styles.icon, styles.formIcon]} />
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={handleAddOrder}
+        style={[
+          styles.iconView,
+          userId !== '0' ? styles.formIconView : styles.formDisabled,
+        ]}>
+        <PlusIcon strokeWidth={4} style={[styles.icon, styles.formIcon]} />
+      </Pressable>
+
       <ModalDialog onClose={onClose} visible={visible}>
-        <Text style={styles.formHeader}>Услуга 'Заказать для меня'</Text>
+        <Text style={styles.formHeader}>{t.orderService}</Text>
         <View style={styles.form}>
           <ControlledInput
             name="url"
-            label="Добавить линки"
+            label={t.addLink}
             placeholder="https://www.trendyol.com/crocs/lila-unises"
             control={control}
             defaultValue={productUrl}
@@ -190,7 +201,7 @@ export const StoreScreen: React.FC<
 
           <ControlledInput
             name="price"
-            label="Цена (TL)"
+            label={t.price}
             placeholder="3913.77"
             control={control}
             defaultValue=""
@@ -199,7 +210,7 @@ export const StoreScreen: React.FC<
 
           <ControlledInput
             name="count"
-            label="Количество"
+            label={t.quantity}
             placeholder="1"
             control={control}
             defaultValue=""
@@ -209,8 +220,8 @@ export const StoreScreen: React.FC<
           <ControlledInput
             name="size"
             type="select"
-            label="Размер"
-            placeholder="Размер"
+            label={t.size}
+            placeholder={t.size}
             control={control}
             defaultValue=""
             submitted={submitted}
@@ -218,7 +229,7 @@ export const StoreScreen: React.FC<
 
           <ControlledInput
             name="color"
-            label="Цвет"
+            label={t.color}
             placeholder="например: Черный"
             control={control}
             defaultValue=""
@@ -227,7 +238,7 @@ export const StoreScreen: React.FC<
 
           <ControlledInput
             name="description"
-            label="Особые примечания"
+            label={t.notes}
             placeholder="примечания"
             control={control}
             defaultValue=""
@@ -236,7 +247,7 @@ export const StoreScreen: React.FC<
 
           <Button
             type={loading ? 'loading' : 'active'}
-            title="Перейти к оплате"
+            title={t.addOrder}
             onPress={handleSubmit(handleFormSubmit)}
           />
         </View>
@@ -258,41 +269,35 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
   } as ViewStyle,
-  icons: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 15,
-    position: 'absolute',
-    right: 15,
-    bottom: 15,
-  } as ViewStyle,
+
   iconView: {
+    position: 'absolute',
+    bottom: '5%',
+    right: '5%',
     backgroundColor: 'white',
-    padding: 15,
+    padding: normalize('width', 15),
     borderRadius: 999,
-    borderColor: 'gray',
-    borderWidth: 1,
   } as ViewStyle,
   icon: {
     color: 'black',
-    width: 30,
-    height: 30,
+    width: normalize('width', 30),
+    height: normalize('height', 30),
   } as ViewStyle,
   formIconView: {
-    backgroundColor: 'red',
+    backgroundColor: '#00997D',
   } as ViewStyle,
+  formDisabled: {
+    backgroundColor: 'gray',
+  },
   formIcon: {
     color: 'white',
   } as ViewStyle,
   formHeader: {
-    fontSize: 23,
+    fontSize: normalize('font', 23),
     fontWeight: '600',
-    marginBottom: 20,
+    marginBottom: normalize('height', 20),
   },
   form: {
-    gap: 10,
+    gap: normalize('height', 10),
   } as ViewStyle,
 });
-
-export default StoreScreen;

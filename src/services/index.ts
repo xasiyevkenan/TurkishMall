@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 const baseURL = 'https://turkishmall.com/api/web';

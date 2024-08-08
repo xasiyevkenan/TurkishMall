@@ -1,111 +1,47 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {StyleSheet, View, ActivityIndicator, ViewStyle} from 'react-native';
-import WebView, {
-  WebViewMessageEvent,
-  WebViewNavigation,
-} from 'react-native-webview';
+import React, {useState, useCallback} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Routes} from 'router/Routes';
 import {NavigationParamList} from 'types/navigation.types';
+import {WebViewComponent} from 'components/main/WebView';
+import {useFocusEffect} from '@react-navigation/native';
+import {useLanguage} from 'contexts/LanguageContext';
 
 export const HomeScreen: React.FC<
   NativeStackScreenProps<NavigationParamList, Routes.home>
 > = ({navigation, route}) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentUrl, setCurrentUrl] = useState('https://turkishmall.com/');
+  const {language} = route?.params ? route?.params : useLanguage();
+  const initialUrl = `https://cfex.az/${language}`;
   const [userId, setUserId] = useState('');
+  const [currentUrl, setCurrentUrl] = useState(initialUrl);
+  const [webViewKey, setWebViewKey] = useState(0);
+  const {language: Salam} = useLanguage();
 
-  const webViewRef = useRef<WebView>(null);
+  console.log(route?.params?.language, 'param');
+  console.log(Salam, 'sala');
 
-  useEffect(() => {
-    if (route.params && route.params.storeUrl !== currentUrl) {
-      navigation.setParams({storeUrl: currentUrl});
-    }
-  }, [currentUrl]);
+  useFocusEffect(
+    useCallback(() => {
+      setUserId('');
+      setCurrentUrl(initialUrl);
+      setWebViewKey(prevKey => prevKey + 1);
+    }, []),
+  );
 
-  const getUserIDFromMetaTag = `
-    if (!window.metaTag) {
-      const metaTag = document.querySelector('meta[property="user_id"]');
-      if (metaTag) {
-        window.metaTag = metaTag;
-        window.ReactNativeWebView.postMessage(metaTag.content);
-      } else {
-        window.ReactNativeWebView.postMessage(null);
-      }
-    }
-  `;
-
-  const runJavaScript = (script: string) => {
-    webViewRef.current?.injectJavaScript(script);
-  };
-
-  const handleOpenWindow = (syntheticEvent: any) => {
-    const {targetUrl} = syntheticEvent.nativeEvent;
-    setCurrentUrl(targetUrl);
-    return true;
-  };
-
-  const handleNavigationStateChange = (navState: WebViewNavigation) => {
-    const {url} = navState;
-    setCurrentUrl(url);
-
-    runJavaScript(getUserIDFromMetaTag);
-
-    if (!url.includes('turkishmall.com')) {
-      navigation.navigate(Routes.store, {storeUrl: url, userId: userId});
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleMessage = (event: WebViewMessageEvent) => {
-    const userIdFromWebView = event.nativeEvent.data;
-    setUserId(userIdFromWebView);
-  };
+  console.log(language, 'home');
+  console.log(language, 'home');
+  console.log(language, 'home');
 
   return (
-    <View style={styles.container}>
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      )}
-      <WebView
-        ref={webViewRef}
-        style={styles.webview}
-        source={{
-          uri:
-            route.params && route.params.storeUrl
-              ? route.params.storeUrl
-              : currentUrl,
-        }}
-        onLoadEnd={() => setLoading(false)}
-        onNavigationStateChange={handleNavigationStateChange}
-        startInLoadingState={true}
-        onMessage={handleMessage}
-        onOpenWindow={handleOpenWindow}
-        renderLoading={() => (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        )}
-      />
-    </View>
+    <WebViewComponent
+      initialUrl={initialUrl}
+      currentUrl={currentUrl}
+      userId={userId}
+      navigation={navigation}
+      navigationStateChangeUrl={`https://cfex.az/${language}`}
+      setUserId={setUserId}
+      setCurrentUrl={setCurrentUrl}
+      mode="multi"
+      webViewKey={webViewKey}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  } as ViewStyle,
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  } as ViewStyle,
-  webview: {
-    flex: 1,
-  } as ViewStyle,
-});

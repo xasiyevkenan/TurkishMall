@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Text,
   Pressable,
@@ -5,7 +6,7 @@ import {
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import {normalize} from 'theme/metrics';
 
 type TType = 'active' | 'disabled' | 'loading';
 
@@ -23,11 +24,13 @@ export const Button: React.FC<IButton> = ({
   return (
     <Pressable
       style={[styles.button, styles[type]]}
-      onPress={type === 'active' ? onPress : null}>
+      onPress={type === 'active' ? onPress : undefined}>
       {type === 'loading' ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <Text style={styles.buttonText}>{title}</Text>
+        <Text style={[styles.buttonText, {fontSize: normalize('font', 18)}]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
@@ -36,19 +39,18 @@ export const Button: React.FC<IButton> = ({
 const styles = StyleSheet.create({
   button: {
     width: '100%',
-    height: 48,
+    height: normalize('vertical', 48),
     backgroundColor: '#00F162',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: normalize('horizontal', 10),
   } as ViewStyle,
   buttonText: {
     fontWeight: '600',
-    fontSize: 18,
     color: 'black',
   } as ViewStyle,
   active: {
-    backgroundColor: '#00F162',
+    backgroundColor: '#00997D',
   } as ViewStyle,
   disabled: {
     backgroundColor: '#B8BAB9',

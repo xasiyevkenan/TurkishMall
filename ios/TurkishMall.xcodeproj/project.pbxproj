@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* TurkishMallTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* TurkishMallTests.m */; };
+		05A6B04C4A9D467DA7DC8733 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D30DEC52DFC64ED9BB4EB3C5 /* Colors.xcassets */; };
 		0C80B921A6F3F58F76C31292 /* libPods-TurkishMall.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-TurkishMall.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -15,6 +16,7 @@
 		6132EF182BDFF13200BBE14D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6132EF172BDFF13200BBE14D /* PrivacyInfo.xcprivacy */; };
 		7699B88040F8A987B510C191 /* libPods-TurkishMall-TurkishMallTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-TurkishMall-TurkishMallTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		97BC0659419140378323EA83 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E90BA35B25144EBE99CA9D9F /* BootSplash.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		6132EF172BDFF13200BBE14D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = TurkishMall/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = TurkishMall/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-TurkishMall-TurkishMallTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TurkishMall-TurkishMallTests.release.xcconfig"; path = "Target Support Files/Pods-TurkishMall-TurkishMallTests/Pods-TurkishMall-TurkishMallTests.release.xcconfig"; sourceTree = "<group>"; };
+		D30DEC52DFC64ED9BB4EB3C5 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = TurkishMall/Colors.xcassets; sourceTree = "<group>"; };
+		E90BA35B25144EBE99CA9D9F /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = TurkishMall/BootSplash.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -94,6 +98,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				E90BA35B25144EBE99CA9D9F /* BootSplash.storyboard */,
+				D30DEC52DFC64ED9BB4EB3C5 /* Colors.xcassets */,
 			);
 			name = TurkishMall;
 			sourceTree = "<group>";
@@ -247,6 +253,8 @@
 				6132EF182BDFF13200BBE14D /* PrivacyInfo.xcprivacy in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				97BC0659419140378323EA83 /* BootSplash.storyboard in Resources */,
+				05A6B04C4A9D467DA7DC8733 /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

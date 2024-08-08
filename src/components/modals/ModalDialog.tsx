@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import CommonDimensions from 'theme/dimension';
+import {normalize} from 'theme/metrics';
 
 interface IModalDialog {
   children?: React.ReactNode;
@@ -49,10 +50,10 @@ const styles = StyleSheet.create({
     height: '100%',
   } as ViewStyle,
   modal: {
-    width: CommonDimensions.windowWidth - 40,
+    width: normalize('width', CommonDimensions.windowWidth - 70),
     backgroundColor: 'white',
-    padding: 30,
-    borderRadius: 16,
+    padding: normalize('horizontal', 30),
+    borderRadius: normalize('width', 16),
     maxHeight: '90%',
   } as ViewStyle,
 });

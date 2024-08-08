@@ -8,10 +8,11 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {normalize} from 'theme/metrics';
 
 type ModalProps = {
   visible: boolean;
-  type: 'success' | 'error';
+  type: string;
   modalText: string;
   onClose: () => void;
 };
@@ -23,13 +24,29 @@ export const ResponseModal: React.FC<ModalProps> = ({
   onClose,
 }) => {
   const getImageSource = () => {
-    return type === 'success'
-      ? require('../../assets/images/success.png')
-      : require('../../assets/images/error.png');
+    switch (type) {
+      case 'success':
+        return require('../../assets/images/success.png');
+      case 'error':
+        return require('../../assets/images/error.png');
+      case 'warning':
+        return require('../../assets/images/warning.png');
+      default:
+        return require('../../assets/images/error.png');
+    }
   };
 
   const getHeaderText = () => {
-    return type === 'success' ? 'Success!' : 'Error!';
+    switch (type) {
+      case 'success':
+        return 'Success!';
+      case 'error':
+        return 'Error!';
+      case 'warning':
+        return 'Warning!';
+      default:
+        return 'Error!';
+    }
   };
 
   return (
@@ -70,39 +87,39 @@ const styles = StyleSheet.create({
   },
   modalView: {
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: normalize('width', 10),
+    padding: normalize('horizontal', 20),
     alignItems: 'center',
     elevation: 5,
-    width: 280,
-    height: 220,
+    width: normalize('width', 280),
+    height: normalize('height', 280),
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: normalize('vertical', 10),
+    right: normalize('horizontal', 10),
     zIndex: 99,
   },
   content: {
     alignItems: 'center',
   },
   image: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
+    width: normalize('width', 120),
+    height: normalize('height', 150),
+    marginBottom: normalize('vertical', 10),
   },
   cross: {
-    width: 35,
-    height: 35,
+    width: normalize('width', 35),
+    height: normalize('height', 35),
   },
   headerText: {
-    fontSize: 18,
+    fontSize: normalize('font', 18),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: normalize('vertical', 5),
   },
   modalText: {
-    fontSize: 16,
+    fontSize: normalize('font', 16),
     textAlign: 'center',
   },
 });

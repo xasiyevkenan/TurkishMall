@@ -1,12 +1,15 @@
 import React from 'react';
-import {MainRouter} from './Main.Router';
 import {NavigationContainer} from '@react-navigation/native';
+import {MainTabRouter} from './Main.Tab.Router';
+import {LanguageProvider} from 'contexts/LanguageContext';
 
 const Router = () => {
   return (
-    <NavigationContainer>
-      <MainRouter />
-    </NavigationContainer>
+    <LanguageProvider>
+      <NavigationContainer>
+        <MainTabRouter />
+      </NavigationContainer>
+    </LanguageProvider>
   );
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Text, TextInput, StyleSheet, ViewStyle} from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
+import {normalize} from 'theme/metrics';
 
 type TInput = 'text' | 'select';
 
@@ -90,33 +91,32 @@ export const Input: React.FC<IInput> = ({
 
 const styles = StyleSheet.create({
   root: {
-    gap: 6,
+    gap: normalize('vertical', 6),
   },
   label: {
     color: 'black',
-    fontSize: 13,
+    fontSize: normalize('font', 13),
     fontWeight: '700',
     width: '100%',
   } as ViewStyle,
   input: {
     borderWidth: 1,
-    padding: 9,
+    padding: normalize('vertical', 9),
     width: '100%',
     alignSelf: 'center',
     borderColor: 'gray',
-    borderRadius: 8,
+    borderRadius: normalize('vertical', 8),
   } as ViewStyle,
   dropdownInput: {
     borderWidth: 1,
-    padding: 9,
+    padding: normalize('vertical', 9),
     width: '100%',
     borderColor: 'gray',
-    borderRadius: 10,
-    height: 40,
+    borderRadius: normalize('vertical', 8),
     justifyContent: 'center',
   } as ViewStyle,
   errorMessage: {
-    fontSize: 13,
+    fontSize: normalize('font', 13),
     fontWeight: '500',
     width: '100%',
     color: 'red',
